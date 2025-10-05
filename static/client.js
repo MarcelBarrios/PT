@@ -11,26 +11,74 @@ const alertEmailInput = document.getElementById('alert-email-input');
 const setAlertBtn = document.getElementById('set-alert-btn');
 
 // --- Functions ---
+// This function clears and rebuilds the stock display grid
 const updateGrid = (symbols, prices) => {
-    // ... (this function is the same as before)
+    tickerGrid.innerHTML = ''; // Clear the grid
+    symbols.forEach(symbol => {
+        const price = prices[symbol] || '...';
+        const stockCard = document.createElement('div');
+        stockCard.className = 'stock-card';
+        stockCard.innerHTML = `
+            <div class="symbol">${symbol}</div>
+            <div class="price">$${price}</div>
+        `;
+        tickerGrid.appendChild(stockCard);
+    });
 };
 
 // --- Socket.IO Event Listeners ---
-socket.on('initial_data', (data) => { /* same as before */ });
-socket.on('price_update', (prices) => { /* same as before */ });
-socket.on('symbols_update', (symbols) => { /* same as before */ });
+
+// Get the initial data when we first connect
+socket.on('initial_data', (data) => {
+    console.log('Received initial data:', data);
+    updateGrid(data.symbols, data.prices);
+});
+
+// Get periodic price updates from the server
+socket.on('price_update', (prices) => {
+    console.log('Received price update:', prices);
+    // Update the prices in the existing cards without rebuilding everything
+    document.querySelectorAll('.stock-card').forEach(card => {
+        const symbol = card.querySelector('.symbol').innerText;
+        if (prices[symbol]) {
+            card.querySelector('.price').innerText = `$${prices[symbol]}`;
+        }
+    });
+});
+
+// Get an updated list of symbols when someone adds a new one
+socket.on('symbols_update', (symbols) => {
+    console.log('Symbol list updated:', symbols);
+    // Re-render the grid with the new symbol list
+    const currentPrices = {};
+    document.querySelectorAll('.stock-card').forEach(card => {
+        const symbol = card.querySelector('.symbol').innerText;
+        const price = card.querySelector('.price').innerText.replace('$', '');
+        currentPrices[symbol] = price;
+    });
+    updateGrid(symbols, currentPrices);
+});
 
 // Listen for a confirmation that our alert was set
 socket.on('alert_confirmation', (message) => {
-    alert(message); // Simple alert to confirm
+    alert(message);
 });
 
+// Listen for feedback, like trying to add a duplicate stock
 socket.on('action_feedback', (message) => {
-    alert(message); // Show the feedback message in a simple popup
+    alert(message);
 });
 
 // --- Socket.IO Event Emitters ---
-addStockBtn.addEventListener('click', () => { /* same as before */ });
+
+// Send a new stock to the server when the 'Add Stock' button is clicked
+addStockBtn.addEventListener('click', () => {
+    const newSymbol = stockInput.value.trim();
+    if (newSymbol) {
+        socket.emit('add_stock', newSymbol);
+        stockInput.value = '';
+    }
+});
 
 // Send the price alert data to the server
 setAlertBtn.addEventListener('click', () => {
