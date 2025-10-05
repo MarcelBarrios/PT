@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Stock Ticker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Real-Time Financial Updates</h1>
+        <p>Prices update automatically every minute.</p>
+        <div id="ticker-grid">
+        </div>
+
+        <div class="form-container">
+            <div class="add-stock-form">
+                <h3>Add Stock to Ticker</h3>
+                <input type="text" id="stock-input" placeholder="e.g., AAPL">
+                <button id="add-stock-btn">Add Stock</button>
+            </div>
+            <div class="price-alert-form">
+                <h3>Set a Price Alert</h3>
+                <input type="text" id="alert-symbol-input" placeholder="Symbol (e.g., SPY)">
+                <input type="number" id="alert-price-input" placeholder="Target Price (e.g., 500)">
+                <input type="email" id="alert-email-input" placeholder="Your Email">
+                <button id="set-alert-btn">Set Alert</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="client.js"></script>
+</body>
+
+</html>
